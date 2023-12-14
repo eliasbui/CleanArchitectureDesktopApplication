@@ -1,16 +1,36 @@
+using CleanArchitecture.Presentation;
+using Serilog;
+
 namespace CleanArchitecture.WF;
 
-static class Program
+internal static class Program
 {
-    /// <summary>
-    ///  The main entry point for the application.
-    /// </summary>
     [STAThread]
-    static void Main()
+    private static void Main()
     {
-        // To customize application configuration such as set high DPI settings or default font,
-        // see https://aka.ms/applicationconfiguration.
-        ApplicationConfiguration.Initialize();
-        Application.Run();
+        //initialize the application loger
+        Log.Information("Starting application");
+
+        try
+        {
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            ApplicationConfiguration.Initialize();
+
+            // run the application
+            Application.Run(new TestForm());
+        }
+        catch (Exception ex) when (ex.GetType().Name is not "StopTheHostException" && ex.GetType().Name is not "HostAbortedException")
+        {
+            Log.Fatal(ex, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            // close the application loger
+            Log.Information("Shutting down the application");
+            Log.CloseAndFlush();
+        }
+
     }
 }
